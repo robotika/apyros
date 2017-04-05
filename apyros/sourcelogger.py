@@ -3,6 +3,9 @@
   SourceLogger from Eduro project
 """
 
+import time
+
+
 class SourceLogger:
   def __init__( self, sourceGet, filename ):
     self.sourceGet = sourceGet
@@ -13,7 +16,7 @@ class SourceLogger:
     else:
       self.file = open( filename )
       try:
-        self.counterLimit = int(self.file.readline())
+        self.counterLimit = int(self.file.readline().split()[0])
       except ValueError:
         # case when given device was not started
         print "EMPTY FILE!!!"
@@ -24,7 +27,7 @@ class SourceLogger:
     if self.sourceGet != None:
       data = self.sourceGet()
       if data != None and data != self.prevData:
-        self.file.write( str(self.counter) + "\n" )
+        self.file.write( str(self.counter) + "\t" + str(time.time()) + "\n" )
         self.file.write( repr(data) + "\n" )
         self.file.flush()
         self.counter = 1
@@ -34,7 +37,7 @@ class SourceLogger:
       if self.counter >= self.counterLimit:
         self.counter = 1
         self.prevData = eval( self.file.readline() )
-        nextCnt = self.file.readline()
+        nextCnt = self.file.readline().split()[0]
         self.counterLimit = float('inf') if nextCnt == '' else int(nextCnt)
         return self.prevData
     self.counter += 1
@@ -47,7 +50,7 @@ class SourceLogger:
       if len(line) == 0:
         break
       self.prevData = eval( line )
-      self.counterLimit = int(self.file.readline())
+      self.counterLimit = int(self.file.readline().split()[0])
       yield self.prevData
 
   def __del__( self ):
